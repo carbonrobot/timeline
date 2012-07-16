@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Timeline Test</title>
+    <link type="text/css" href="timeline/timeline.css" rel="stylesheet" />
+</head>
+<body>
+
+<h2>Timeline Test</h2>
+
+<div style="width:70%; margin: 35px auto">
+    <div style="margin-bottom: 25px;">
+        <button type="button" onclick="Timeline.setScale('hours');return false;">Hours</button>
+        <button type="button" onclick="Timeline.setScale('days');return false;">Days</button>
+        <button type="button" onclick="Timeline.setScale('weeks');return false;">Weeks</button>
+        <button type="button" onclick="Timeline.setScale('months');return false;">Months</button>
+    </div>
+
+    <!-- timeline -->
+    <div id="timeline" class="timeline">
+        <div class="leftarrow">
+            &nbsp;
+        </div>
+        <div class="center">
+            &nbsp;
+        </div>
+        <div class="rightarrow">
+            &nbsp;
+        </div>
+        <div class="selector">&nbsp;</div>
+    </div>
+</div>
+
+<script src="jquery-1.7.2.min.js" type="text/javascript"></script>
+<script src="jquery-ui-1.8.20.min.js" type="text/javascript"></script>
+<script src="moment.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="timeline.js"></script>
+<script type="text/javascript">
+    $(function () {
+
+        Timeline.init({
+            id: '#timeline'
+        });
+
+    });
+</script>
+</body>
+</html>

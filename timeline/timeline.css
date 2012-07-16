@@ -1,0 +1,65 @@
+﻿* { margin: 0; padding: 0; }
+div.timeline {
+    position: relative;
+    width: 100%;
+}
+div.timeline *{
+    -moz-user-select: -moz-none;
+   -khtml-user-select: none;
+   -webkit-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
+}
+div.timeline div.leftarrow, div.timeline div.rightarrow {
+    position: absolute;
+    top: 0;
+    width: 24px;
+    height: 24px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+div.timeline div.leftarrow {
+    left: 0;
+    background-image: url(images/leftarrow_48.gif);
+}
+div.timeline div.rightarrow {
+    right: 0;
+    background-image: url(images/rightarrow_48.gif);
+}
+div.timeline div.center {
+    position: relative;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 24px;
+    margin: 0 12px;
+    padding: 26px 0px;
+    background-image: url(images/line_48.gif);
+    background-repeat: repeat-x;
+    background-position: 0px 5px;
+}
+div.timeline div.center ul {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+div.timeline div.center ul li {
+    display: inline-block;
+    zoom:1; *display: inline;
+    width: 14%;
+    text-align: center;
+    list-style-type: none;
+    cursor: pointer;
+}
+div.timeline div.selector {
+    position: absolute;
+    top: 2px;
+    left: 20px;
+    width: 85px;
+    height: 20px;
+    background: #e3e1e1;
+    border: 1px solid #CCC;
+    text-align: center;
+    border-radius: 4px;
+    cursor: pointer;
+}
