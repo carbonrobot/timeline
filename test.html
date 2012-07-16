@@ -14,6 +14,7 @@
         <button type="button" onclick="Timeline.setScale('days');return false;">Days</button>
         <button type="button" onclick="Timeline.setScale('weeks');return false;">Weeks</button>
         <button type="button" onclick="Timeline.setScale('months');return false;">Months</button>
+        
     </div>
 
     <!-- timeline -->
@@ -29,6 +30,8 @@
         </div>
         <div class="selector">&nbsp;</div>
     </div>
+
+    <div id="report" style="margin-top: 25px;">&nbsp;</div>
 </div>
 
 <script src="jquery-1.7.2.min.js" type="text/javascript"></script>
@@ -39,7 +42,10 @@
     $(function () {
 
         Timeline.init({
-            id: '#timeline'
+            id: '#timeline',
+            selectionChanged: function (selectedDates) {
+                $('#report').text(selectedDates);
+            }
         });
 
     });

@@ -3,20 +3,22 @@ var Timeline = (function ($, window, document, undefined) {
     var self = this;
     var options = {
         id: '#timeline',
-        scale: 'weeks', // hours, days, weeks, months
+        scale: 'days', // hours, days, weeks, months
         startDate: moment().add('days', -6).format('MM/DD/YYYY'),
-        endDate: moment().format('MM/DD/YYYY'),
-        selectedDates: [moment().format('MM/DD/YYYY'), moment().format('MM/DD/YYYY')],
+        selectedDate: moment().format('MM/DD/YYYY'),
         optionsChanged: function () { }
     };
 
     // load segments
     var loadSegments = function () {
-        var endDate = moment(options.endDate);
-        var trackDate = moment(options.endDate).add(options.scale, (-getDuration() + 1));
+        // setup the timeline start and end
+        var startDate = moment(options.startDate);
+        var duration = getDuration();
+
         var k = '<ul>';
-        while (endDate.diff(trackDate, options.scale) >= 0) {
-            k += '<li>' + getFormat(trackDate) + '</li>';
+        for (var i = 0; i < duration; i++) {
+            var trackDate = moment(startDate).add(options.scale, i);
+            k += '<li data-attr="' + trackDate + '">' + getFormat(trackDate) + '</li>';
             trackDate.add(options.scale, 1);
         }
         k += '</ul>';
@@ -62,54 +64,71 @@ var Timeline = (function ($, window, document, undefined) {
         };
     };
 
+    // transforms the dates into the correct scale
+    var getScaledDates = function (selectedDate) {
+        var endDate = moment(selectedDate).minutes(0).seconds(0);
+        var startDate = moment(endDate);
+
+        switch (options.scale) {
+            case 'hours':
+                return [startDate, endDate];
+            case 'days':
+                return [startDate.sod(), endDate.eod()];
+            case 'weeks':
+                return [startDate.day(0).sod(), endDate.day(6).eod()];
+            case 'months':
+                return [startDate.date(1).sod(), endDate.date(endDate.daysInMonth()).eod()];
+        };
+    };
+
     // scroll the timeline left
     var scrollLeft = function () {
-        options.startDate = moment(options.startDate).add(options.scale, -1)
-        options.endDate = moment(options.endDate).add(options.scale, -1)
+        options.startDate = moment(options.startDate).add(options.scale, -1);
         loadSegments();
 
-        _optionsChanged();
+        _selectionChanged();
     };
 
     // scroll the timeline right
     var scrollRight = function () {
-        options.startDate = moment(options.startDate).add(options.scale, 1)
-        options.endDate = moment(options.endDate).add(options.scale, 1)
+        options.startDate = moment(options.startDate).add(options.scale, 1);
         loadSegments();
 
-        _optionsChanged();
+        _selectionChanged();
     };
 
     // segment clicks change the selection
     var segmentSelected = function (segment) {
-        var selectedDate = moment($(segment).text());
-        options.selectedDates = [selectedDate, selectedDate];
-        _moveSelector(segment, _optionsChanged);
+        options.selectedDate = moment(Number($(segment).attr('data-attr')));
+
+        _moveSelector(segment, _selectionChanged);
     };
 
     // scale
     var changeScale = function (value) {
         options.scale = value;
 
-        // modify the start and end dates
-        switch (options.scale) {
-            case 'hours':
-                options.selectedDates = options.selectedDates;
-            case 'days':
-                options.selectedDates = options.selectedDates;
-            case 'weeks':
-                options.selectedDates = options.selectedDates;
-            case 'months':
-                options.selectedDates = options.selectedDates;
-        };
+        //options.selectedDates = getScaledDates();
 
         // reload ui
         loadSegments();
     };
 
+    // init selector
+    var _initSelector = function () {
+        $(options.id).find('div.selector').draggable({
+            axis: 'x',
+            containment: 'parent',
+            snap: options.id + ' div.center ul li',
+            snapTolerance: 45,
+            distance: 45,
+            stop: selectorChanged
+        });
+    };
+
     // move the selector to the selected dates
     var _resetSelector = function () {
-        var match = getFormat(moment(options.selectedDates[0]));
+        var match = getFormat(moment(options.selectedDate));
         var segment = $(options.id).find('li:contains(' + match + ')');
         _moveSelector(segment, function () {
             // nothing
@@ -137,14 +156,15 @@ var Timeline = (function ($, window, document, undefined) {
         }
     };
 
-    var selectorClicked = function () {
-        console.log('selector clicked');
+    var selectorChanged = function () {
+        // TODO: determine what it stopped over and set the dates
+        _selectionChanged();
     };
 
     // options changed handler
-    var _optionsChanged = function () {
+    var _selectionChanged = function () {
 
-        options.optionsChanged();
+        options.selectionChanged(getScaledDates(options.selectedDate));
     };
 
     return {
@@ -161,24 +181,14 @@ var Timeline = (function ($, window, document, undefined) {
                 scrollRight();
             });
 
+            // wire up selector and set its initial position
+            _initSelector();
+
             // load the segments
             loadSegments();
-
-            // wire up selector and set its initial position
-            $(options.id).find('div.selector').click(function (e) {
-                selectorClicked();
-            });
-
         },
 
-        getSelectedDates: function () {
-            return options.selectedDates;
-        },
-
-        setSelectedDates: function (value) {
-            options.selectedDates = value;
-            loadSegments();
-        },
+        getSelectedDates: getScaledDates,
 
         getScale: function () {
             return options.scale;
