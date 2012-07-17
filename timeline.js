@@ -6,7 +6,7 @@ var Timeline = (function ($, window, document, undefined) {
         scale: 'days', // hours, days, weeks, months
         startDate: moment().add('days', -6).format('MM/DD/YYYY'),
         selectedDate: moment().format('MM/DD/YYYY'),
-        optionsChanged: function () { }
+        selectionChanged: function () { }
     };
 
     // load segments
@@ -196,9 +196,8 @@ var Timeline = (function ($, window, document, undefined) {
         }
     };
 
-    // options changed handler
+    // selection changed handler
     var selectionChanged = function () {
-        console.log('timeline start: ' + options.startDate.toString());
         options.selectionChanged(getScaledDates(options.selectedDate));
     };
 
