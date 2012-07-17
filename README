@@ -1,0 +1,7 @@
+Timeline
+
+Timeline takes any date input and displays it on a selectable scale for macro date selection in any application.
+
+    git clone git@github.com:carbonrobot/timeline.git
+	
+Open the test.html page to see the interactions
