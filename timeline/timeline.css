@@ -42,7 +42,6 @@ div.timeline div.center ul {
     margin-left: 5px;
     margin-right: 5px;
 }
-
 div.timeline div.center ul li {
     display: inline-block;
     zoom:1; *display: inline;
@@ -62,4 +61,14 @@ div.timeline div.selector {
     text-align: center;
     border-radius: 4px;
     cursor: pointer;
+    background-image: url(images/handle.gif);
+    background-repeat: no-repeat;
+    background-position: center center;
 }
+.ui-resizable-e { 
+    cursor: e-resize; width: 7px; right: -5px; top: 0; height: 100%;
+}
+.ui-resizable-w { 
+    cursor: w-resize; width: 7px; left: -5px; top: 0; height: 100%;
+}
+.ui-resizable-handle { position: absolute; font-size: 0.1px; display: block; }

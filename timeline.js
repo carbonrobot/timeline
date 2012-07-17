@@ -13,16 +13,17 @@ var Timeline = (function ($, window, document, undefined) {
     var loadSegments = function () {
         var startDate = moment(options.startDate);
         var duration = getDuration();
+        var $container = $(options.id).find('div.center');
 
         // setup the timeline start and end
         var k = '<ul>';
         for (var i = 0; i < duration; i++) {
             var trackDate = moment(startDate).add(options.scale, i);
-            k += '<li data-attr="' + trackDate + '">' + getFormat(trackDate) + '</li>';
+            k += '<li data-attr="' + trackDate + '"><span>' + getFormat(trackDate) + '</span></li>';
             trackDate.add(options.scale, 1);
         }
         k += '</ul>';
-        $(options.id).find('div.center').empty().append(k);
+        $container.empty().append(k);
 
         // adjust css size of segments
         var $segments = $(options.id).find('div.center ul li');
@@ -148,9 +149,16 @@ var Timeline = (function ($, window, document, undefined) {
                 var snappedTo = $.map(snapped, function (element) {
                     return element.snapping ? element.item : null;
                 });
-
+                console.log(snappedTo);
                 // assume center element
                 segmentSelected(snappedTo[1]);
+            }
+        }).resizable({
+            containment: 'parent',
+            handles: 'e, w',
+            distance: 5,
+            stop: function (event, ui) {
+                console.log('stopped');
             }
         });
     };
@@ -166,14 +174,17 @@ var Timeline = (function ($, window, document, undefined) {
 
     // move the selector to the selected segment
     var moveSelector = function (segment, callback) {
-        $segment = $(segment);
-        $selector = $(options.id).find('div.selector');
+        var $segment = $(segment);
+        var $span = $segment.find('span');
+        var $selector = $(options.id).find('div.selector');
 
         // move the selector or hide if no match
         if ($segment.length > 0) {
             $selector.show();
             $selector.width($segment.width());
+            $selector.resizable("option", "grid", [$segment.width(), 0]);
 
+            // animate movement
             $selector.animate({
                 left: $segment.position().left + 12
             }, 100, 'easeInCubic', function () {
@@ -210,6 +221,9 @@ var Timeline = (function ($, window, document, undefined) {
 
             // load the segments
             loadSegments();
+
+            // watch window resizing
+            $(window).resize(loadSegments);
         },
 
         getSelectedDates: getScaledDates,
