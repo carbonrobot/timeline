@@ -11,10 +11,10 @@ var Timeline = (function ($, window, document, undefined) {
 
     // load segments
     var loadSegments = function () {
-        // setup the timeline start and end
         var startDate = moment(options.startDate);
         var duration = getDuration();
 
+        // setup the timeline start and end
         var k = '<ul>';
         for (var i = 0; i < duration; i++) {
             var trackDate = moment(startDate).add(options.scale, i);
@@ -33,7 +33,7 @@ var Timeline = (function ($, window, document, undefined) {
             segmentSelected(this);
         });
 
-        _resetSelector();
+        resetSelector();
     };
 
     // get display format
@@ -64,6 +64,27 @@ var Timeline = (function ($, window, document, undefined) {
         };
     };
 
+    // adjust segment start date to fit the selected date and range
+    var getSegmentStartDate = function () {
+        var startDate = moment(options.startDate);
+        var selectedDate = moment(options.selectedDate);
+        var duration = (-getDuration() + 1);
+
+        // adjust the start date of the timeline
+        switch (options.scale) {
+            case 'hours':
+                // only 1 day is shown
+                return selectedDate.sod();
+            case 'days':
+                // selectedDate is the end, start at (selected - duration)
+                return selectedDate.add('days', duration);
+            case 'weeks':
+                return selectedDate.day(0).add('weeks', duration);
+            case 'months':
+                return selectedDate.date(1).sod().add('months', duration);
+        };
+    };
+
     // transforms the dates into the correct scale
     var getScaledDates = function (selectedDate) {
         var endDate = moment(selectedDate).minutes(0).seconds(0);
@@ -71,7 +92,7 @@ var Timeline = (function ($, window, document, undefined) {
 
         switch (options.scale) {
             case 'hours':
-                return [startDate, endDate];
+                return [startDate, endDate.minutes(59).seconds(59)];
             case 'days':
                 return [startDate.sod(), endDate.eod()];
             case 'weeks':
@@ -86,7 +107,7 @@ var Timeline = (function ($, window, document, undefined) {
         options.startDate = moment(options.startDate).add(options.scale, -1);
         loadSegments();
 
-        _selectionChanged();
+        selectionChanged();
     };
 
     // scroll the timeline right
@@ -94,49 +115,57 @@ var Timeline = (function ($, window, document, undefined) {
         options.startDate = moment(options.startDate).add(options.scale, 1);
         loadSegments();
 
-        _selectionChanged();
+        selectionChanged();
     };
 
     // segment clicks change the selection
     var segmentSelected = function (segment) {
         options.selectedDate = moment(Number($(segment).attr('data-attr')));
-
-        _moveSelector(segment, _selectionChanged);
+        moveSelector(segment, selectionChanged);
     };
 
     // scale
     var changeScale = function (value) {
+        // adjust the segment dates to match the scale
         options.scale = value;
-
-        //options.selectedDates = getScaledDates();
-
-        // reload ui
+        options.startDate = getSegmentStartDate();
         loadSegments();
+
+        selectionChanged();
     };
 
     // init selector
-    var _initSelector = function () {
+    var initSelector = function () {
         $(options.id).find('div.selector').draggable({
             axis: 'x',
             containment: 'parent',
             snap: options.id + ' div.center ul li',
             snapTolerance: 45,
             distance: 45,
-            stop: selectorChanged
+            stop: function (event, ui) {
+                // http: //stackoverflow.com/questions/5177867/how-to-find-out-about-the-snapped-to-element-for-jquery-ui-draggable-elements
+                var snapped = $(this).data('draggable').snapElements;
+                var snappedTo = $.map(snapped, function (element) {
+                    return element.snapping ? element.item : null;
+                });
+
+                // assume center element
+                segmentSelected(snappedTo[1]);
+            }
         });
     };
 
     // move the selector to the selected dates
-    var _resetSelector = function () {
+    var resetSelector = function () {
         var match = getFormat(moment(options.selectedDate));
         var segment = $(options.id).find('li:contains(' + match + ')');
-        _moveSelector(segment, function () {
+        moveSelector(segment, function () {
             // nothing
         });
     };
 
     // move the selector to the selected segment
-    var _moveSelector = function (segment, callback) {
+    var moveSelector = function (segment, callback) {
         $segment = $(segment);
         $selector = $(options.id).find('div.selector');
 
@@ -156,14 +185,9 @@ var Timeline = (function ($, window, document, undefined) {
         }
     };
 
-    var selectorChanged = function () {
-        // TODO: determine what it stopped over and set the dates
-        _selectionChanged();
-    };
-
     // options changed handler
-    var _selectionChanged = function () {
-
+    var selectionChanged = function () {
+        console.log('timeline start: ' + options.startDate.toString());
         options.selectionChanged(getScaledDates(options.selectedDate));
     };
 
@@ -182,7 +206,7 @@ var Timeline = (function ($, window, document, undefined) {
             });
 
             // wire up selector and set its initial position
-            _initSelector();
+            initSelector();
 
             // load the segments
             loadSegments();
